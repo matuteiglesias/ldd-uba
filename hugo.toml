@@ -1,0 +1,13 @@
+
+baseURL = "https://matuteiglesias.github.io/ldd-uba/"
+languageCode = "es"
+title = "Ejercicios en Notebooks"
+theme = "techdoc"
+
+
+[menu]
+  [[menu.main]]
+    name = "Notebooks"
+    weight = 1
+    url = "/notebooks/"
+

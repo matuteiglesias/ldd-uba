@@ -1,0 +1,156 @@
+# Guide: Deploying a Hugo Site with Jupyter Notebooks to GitHub Pages
+
+This guide walks through setting up a Hugo site that hosts Jupyter Notebooks as markdown-rendered HTML pages, and deploying it to GitHub Pages.
+
+---
+
+## **1️⃣ Install and Setup Hugo**
+### **1.1 Install Hugo (Extended Version)**
+```bash
+sudo snap install hugo --channel=extended
+```
+Check installation:
+```bash
+hugo version
+```
+Ensure the output mentions `extended`.
+
+---
+
+## **2️⃣ Initialize the Hugo Site**
+```bash
+mkdir -p ~/repos && cd ~/repos
+hugo new site my_hugo_site
+cd my_hugo_site
+```
+
+---
+
+## **3️⃣ Install a Hugo Theme**
+Clone the Ananke theme (or any theme of choice):
+```bash
+git clone https://github.com/theNewDynamic/gohugo-theme-ananke.git themes/ananke
+```
+Configure the site by editing `config.toml`:
+```bash
+echo 'baseURL = "https://matuteiglesias.github.io/ldd/"' >> config.toml
+echo 'languageCode = "es"' >> config.toml
+echo 'title = "Ejercicios en Notebooks"' >> config.toml
+echo 'theme = "ananke"' >> config.toml
+```
+
+---
+
+## **4️⃣ Add Notebook Processing Script**
+This script converts Jupyter notebooks (`.ipynb`) to markdown (`.md`) for Hugo:
+
+```bash
+cat <<EOL > convert_notebooks.py
+import os
+import nbformat
+from nbconvert import MarkdownExporter
+
+def convert_notebooks():
+    input_dir = "notebooks"
+    output_dir = "my_hugo_site/content/notebooks"
+    os.makedirs(output_dir, exist_ok=True)
+    
+    for filename in os.listdir(input_dir):
+        if filename.endswith(".ipynb"):
+            input_path = os.path.join(input_dir, filename)
+            output_path = os.path.join(output_dir, filename.replace(".ipynb", ".md"))
+            
+            with open(input_path, "r", encoding="utf-8") as f:
+                notebook = nbformat.read(f, as_version=4)
+                md_exporter = MarkdownExporter()
+                body, _ = md_exporter.from_notebook_node(notebook)
+                
+                with open(output_path, "w", encoding="utf-8") as out_f:
+                    out_f.write(body)
+
+if __name__ == "__main__":
+    convert_notebooks()
+EOL
+```
+
+Create the required directories:
+```bash
+mkdir -p notebooks my_hugo_site/content/notebooks
+```
+
+---
+
+## **5️⃣ Build and Deploy the Hugo Site**
+### **5.1 Run Hugo Locally**
+Test the site locally:
+```bash
+hugo server
+```
+Access the local site at: `http://localhost:1313/`
+
+If everything looks good, build the static site:
+```bash
+hugo -d public
+```
+
+---
+
+### **5.2 Deploy to GitHub Pages**
+Initialize and commit the public directory:
+```bash
+cd my_hugo_site/public
+git init
+git add .
+git commit -m "Deploy Hugo site"
+git branch -M gh-pages
+```
+Push to the remote GitHub repository:
+```bash
+git remote add origin https://github.com/matuteiglesias/ldd.git
+git push -f origin gh-pages
+```
+
+---
+
+## **6️⃣ Configure GitHub Pages**
+1. Go to **GitHub repository** → **Settings** → **Pages**.
+2. Select **Branch: `gh-pages`**, set root folder.
+3. Wait a few minutes and check: [https://matuteiglesias.github.io/ldd/](https://matuteiglesias.github.io/ldd/)
+
+---
+
+## **7️⃣ Automate Deployment with a Script**
+To automate the entire process, create `deploy.sh`:
+```bash
+cat <<EOL > deploy.sh
+#!/bin/bash
+python3 convert_notebooks.py
+cd my_hugo_site
+hugo -d public
+cd public
+git init
+git add .
+git commit -m "Deploy Hugo site"
+git branch -M gh-pages
+git remote add origin https://github.com/matuteiglesias/ldd.git
+git push -f origin gh-pages
+EOL
+chmod +x deploy.sh
+```
+
+Run the script to deploy the site:
+```bash
+./deploy.sh
+```
+
+---
+
+## **✅ Summary**
+This setup allows you to:
+- Host a Hugo-generated site on GitHub Pages.
+- Convert Jupyter Notebooks into markdown for Hugo.
+- Automate the deployment with a single script.
+
+🚀 **Now your notebooks are available as interactive Hugo-rendered web pages!**
+
+

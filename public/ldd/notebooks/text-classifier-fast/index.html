@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Text Classifier Fast - Ejercicios en Notebooks</title>
+<meta name="generator" content="Hugo 0.145.0">
+<link href="https://matuteiglesias.github.io/ldd-uba//index.xml" rel="alternate" type="application/rss+xml">
+<link rel="canonical" href="https://matuteiglesias.github.io/ldd-uba/ldd/notebooks/text-classifier-fast/">
+<link rel="stylesheet" href="https://matuteiglesias.github.io/ldd-uba/css/theme.min.css">
+<link rel="stylesheet" href="https://matuteiglesias.github.io/ldd-uba/css/chroma.min.css">
+<script defer src="https://matuteiglesias.github.io/ldd-uba//js/fontawesome6/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery.easing@1.4.1/jquery.easing.min.js" integrity="sha256-H3cjtrm/ztDeuhCN9I4yh4iN2Ybx/y1RM7rMmAesA0k=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js" integrity="sha256-4XodgW4TwIJuDtf+v6vDJ39FVxI0veC/kSCCmnFp7ck=" crossorigin="anonymous"></script>
+<script src="https://matuteiglesias.github.io/ldd-uba/js/bundle.js"></script><style>
+:root {}
+</style>
+<meta property="og:url" content="https://matuteiglesias.github.io/ldd-uba/ldd/notebooks/text-classifier-fast/">
+  <meta property="og:site_name" content="Ejercicios en Notebooks">
+  <meta property="og:title" content="Text Classifier Fast">
+  <meta property="og:description" content="from sklearn.datasets import fetch_20newsgroups from sklearn.feature_extraction.text import TfidfVectorizer from sklearn.model_selection import train_test_split # Load dataset with 20 broad categories categories = [ &#34;sci.space&#34;, &#34;sci.electronics&#34;, &#34;sci.med&#34;, &#34;comp.graphics&#34;, &#34;comp.os.ms-windows.misc&#34;, &#34;rec.sport.baseball&#34;, &#34;rec.sport.hockey&#34;, &#34;talk.politics.misc&#34;, &#34;talk.religion.misc&#34;, &#34;misc.forsale&#34; ] newsgroups = fetch_20newsgroups(subset=&#34;all&#34;, categories=categories, remove=(&#34;headers&#34;, &#34;footers&#34;, &#34;quotes&#34;)) # Convert text to TF-IDF feature vectors vectorizer = TfidfVectorizer(stop_words=&#34;english&#34;, max_features=5000) # Limit feature size for speed X = vectorizer.fit_transform(newsgroups.data) y = newsgroups.target # Category labels # Split into train and test sets X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42) from sklearn.linear_model import LogisticRegression from sklearn.metrics import accuracy_score # Train the Logistic Regression classifier logreg = LogisticRegression(max_iter=1000) logreg.fit(X_train, y_train) # Evaluate on test set y_pred = logreg.predict(X_test) print(&#34;Logistic Regression Accuracy:&#34;, accuracy_score(y_test, y_pred)) Logistic Regression Accuracy: 0.8073196986006459 from sklearn.naive_bayes import MultinomialNB # Train the Naïve Bayes classifier nb = MultinomialNB() nb.fit(X_train, y_train) # Evaluate on test set y_pred_nb = nb.predict(X_test) print(&#34;Naïve Bayes Accuracy:&#34;, accuracy_score(y_test, y_pred_nb)) Naïve Bayes Accuracy: 0.8089343379978472 def classify_text(text, model): X_new = vectorizer.transform([text]) # Convert text to numerical features predicted_category = newsgroups.target_names[model.predict(X_new)[0]] return predicted_category sample_text = &#34;The recent discovery of a new exoplanet has excited many astronomers.&#34; print(&#34;Predicted Category (Logistic Regression):&#34;, classify_text(sample_text, logreg)) print(&#34;Predicted Category (Naïve Bayes):&#34;, classify_text(sample_text, nb)) Predicted Category (Logistic Regression): sci.space Predicted Category (Naïve Bayes): sci.space import os import re # Cargar modelo de spaCy en español y stopwords import spacy nlp = spacy.load(&#34;es_core_news_sm&#34;) # import nltk from nltk.corpus import stopwords spanish_stopwords = set(stopwords.words(&#34;spanish&#34;)) # Precompilar la regex para limpiar el texto CLEAN_PATTERN = re.compile(r&#34;&lt;.*?&gt;|[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]&#34;) CHUNKS_DIR = &#39;/home/matias/RAG_master/storage/chunks&#39; def clean_text_batch(texts: list[str]) -&gt; list[str]: &#34;&#34;&#34; Limpia y lematiza un lote de textos utilizando spaCy en modo pipe. &#34;&#34;&#34; cleaned_texts = [] # Preprocesar cada texto con regex preprocessed_texts = [CLEAN_PATTERN.sub(&#34; &#34;, text).lower().strip() for text in texts] # Procesar el lote con nlp.pipe (esto es más rápido) for doc in nlp.pipe(preprocessed_texts, batch_size=32): # Filtrar stopwords y obtener lemas en un solo paso tokens = [token.lemma_ for token in doc if token.text not in spanish_stopwords] cleaned_texts.append(&#34; &#34;.join(tokens)) return cleaned_texts # %% # Cargar textos de chunks en una lista (en vez de procesarlos uno por uno) def load_all_chunk_texts(chunk_ids: list[str]) -&gt; list[tuple[str, str]]: &#34;&#34;&#34; Carga todos los textos de chunks dados sus IDs. Se asume que los textos se encuentran en &#39;./chunks/&lt;chunk_id&gt;.txt&#39;. Retorna una lista de tuplas (chunk_id, raw_text). &#34;&#34;&#34; texts = [] for chunk_id in chunk_ids: file_path = os.path.join(CHUNKS_DIR, f&#34;{chunk_id}.txt&#34;) if os.path.isfile(file_path): with open(file_path, &#34;r&#34;, encoding=&#34;utf-8&#34;) as f: raw_text = f.read() if raw_text.strip(): texts.append((chunk_id, raw_text)) return texts import pandas as pd from chunk_query import ChunkQuery # Tu clase de consulta, tal como la definimos antes CHUNKS_METADATA_FILE= &#34;/home/matias/RAG_master/storage/tables/chunks_index.json&#34; df_metadata = pd.read_json(CHUNKS_METADATA_FILE, orient=&#34;index&#34;) # 2. Inicializar la clase de consulta y filtrar los chunks de la carpeta /Academic/ cq = ChunkQuery(df_metadata) # Ejemplo de query: Filtrar aquellos chunks cuyo &#39;original_path&#39; contenga &#39;/Academic/&#39; academic_chunk_ids = cq.query_custom(&#34;original_path.str.contains(&#39;/Academic/1_Input_Raw/Drafts_Papers_Early_Drafts/2024_1/AGGVOL&#39;)&#34;) print(&#34;Cantidad de chunks en /Academic/1_Input_Raw/Drafts_Papers_Early_Drafts:&#34;, len(academic_chunk_ids)) # Cargar todos los textos all_chunks = load_all_chunk_texts(academic_chunk_ids[:100]) # academic_chunk_ids es la lista filtrada chunk_ids, raw_texts = zip(*all_chunks) # Separar IDs y textos chunk_ids, cleaned_texts = chunk_ids, clean_text_batch(raw_texts[:100]) # Separar IDs y textos --------------------------------------------------------------------------- FileNotFoundError Traceback (most recent call last) Cell In[6], line 6 2 from chunk_query import ChunkQuery # Tu clase de consulta, tal como la definimos antes 4 CHUNKS_METADATA_FILE= &#34;/home/matias/RAG_master/storage/tables/chunks_index.json&#34; ----&gt; 6 df_metadata = pd.read_json(CHUNKS_METADATA_FILE, orient=&#34;index&#34;) 8 # 2. Inicializar la clase de consulta y filtrar los chunks de la carpeta /Academic/ 9 cq = ChunkQuery(df_metadata) File ~/anaconda3/envs/new_env/lib/python3.11/site-packages/pandas/io/json/_json.py:791, in read_json(path_or_buf, orient, typ, dtype, convert_axes, convert_dates, keep_default_dates, precise_float, date_unit, encoding, encoding_errors, lines, chunksize, compression, nrows, storage_options, dtype_backend, engine) 788 if convert_axes is None and orient != &#34;table&#34;: 789 convert_axes = True --&gt; 791 json_reader = JsonReader( 792 path_or_buf, 793 orient=orient, 794 typ=typ, 795 dtype=dtype, 796 convert_axes=convert_axes, 797 convert_dates=convert_dates, 798 keep_default_dates=keep_default_dates, 799 precise_float=precise_float, 800 date_unit=date_unit, 801 encoding=encoding, 802 lines=lines, 803 chunksize=chunksize, 804 compression=compression, 805 nrows=nrows, 806 storage_options=storage_options, 807 encoding_errors=encoding_errors, 808 dtype_backend=dtype_backend, 809 engine=engine, 810 ) 812 if chunksize: 813 return json_reader File ~/anaconda3/envs/new_env/lib/python3.11/site-packages/pandas/io/json/_json.py:904, in JsonReader.__init__(self, filepath_or_buffer, orient, typ, dtype, convert_axes, convert_dates, keep_default_dates, precise_float, date_unit, encoding, lines, chunksize, compression, nrows, storage_options, encoding_errors, dtype_backend, engine) 902 self.data = filepath_or_buffer 903 elif self.engine == &#34;ujson&#34;: --&gt; 904 data = self._get_data_from_filepath(filepath_or_buffer) 905 self.data = self._preprocess_data(data) File ~/anaconda3/envs/new_env/lib/python3.11/site-packages/pandas/io/json/_json.py:960, in JsonReader._get_data_from_filepath(self, filepath_or_buffer) 952 filepath_or_buffer = self.handles.handle 953 elif ( 954 isinstance(filepath_or_buffer, str) 955 and filepath_or_buffer.lower().endswith( (...) 958 and not file_exists(filepath_or_buffer) 959 ): --&gt; 960 raise FileNotFoundError(f&#34;File {filepath_or_buffer} does not exist&#34;) 961 else: 962 warnings.warn( 963 &#34;Passing literal json to &#39;read_json&#39; is deprecated and &#34; 964 &#34;will be removed in a future version. To read from a &#34; (...) 967 stacklevel=find_stack_level(), 968 ) FileNotFoundError: File /home/matias/RAG_master/storage/tables/chunks_index.json does not exist">
+  <meta property="og:locale" content="es">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="notebooks">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Text Classifier Fast">
+  <meta name="twitter:description" content="from sklearn.datasets import fetch_20newsgroups from sklearn.feature_extraction.text import TfidfVectorizer from sklearn.model_selection import train_test_split # Load dataset with 20 broad categories categories = [ &#34;sci.space&#34;, &#34;sci.electronics&#34;, &#34;sci.med&#34;, &#34;comp.graphics&#34;, &#34;comp.os.ms-windows.misc&#34;, &#34;rec.sport.baseball&#34;, &#34;rec.sport.hockey&#34;, &#34;talk.politics.misc&#34;, &#34;talk.religion.misc&#34;, &#34;misc.forsale&#34; ] newsgroups = fetch_20newsgroups(subset=&#34;all&#34;, categories=categories, remove=(&#34;headers&#34;, &#34;footers&#34;, &#34;quotes&#34;)) # Convert text to TF-IDF feature vectors vectorizer = TfidfVectorizer(stop_words=&#34;english&#34;, max_features=5000) # Limit feature size for speed X = vectorizer.fit_transform(newsgroups.data) y = newsgroups.target # Category labels # Split into train and test sets X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42) from sklearn.linear_model import LogisticRegression from sklearn.metrics import accuracy_score # Train the Logistic Regression classifier logreg = LogisticRegression(max_iter=1000) logreg.fit(X_train, y_train) # Evaluate on test set y_pred = logreg.predict(X_test) print(&#34;Logistic Regression Accuracy:&#34;, accuracy_score(y_test, y_pred)) Logistic Regression Accuracy: 0.8073196986006459 from sklearn.naive_bayes import MultinomialNB # Train the Naïve Bayes classifier nb = MultinomialNB() nb.fit(X_train, y_train) # Evaluate on test set y_pred_nb = nb.predict(X_test) print(&#34;Naïve Bayes Accuracy:&#34;, accuracy_score(y_test, y_pred_nb)) Naïve Bayes Accuracy: 0.8089343379978472 def classify_text(text, model): X_new = vectorizer.transform([text]) # Convert text to numerical features predicted_category = newsgroups.target_names[model.predict(X_new)[0]] return predicted_category sample_text = &#34;The recent discovery of a new exoplanet has excited many astronomers.&#34; print(&#34;Predicted Category (Logistic Regression):&#34;, classify_text(sample_text, logreg)) print(&#34;Predicted Category (Naïve Bayes):&#34;, classify_text(sample_text, nb)) Predicted Category (Logistic Regression): sci.space Predicted Category (Naïve Bayes): sci.space import os import re # Cargar modelo de spaCy en español y stopwords import spacy nlp = spacy.load(&#34;es_core_news_sm&#34;) # import nltk from nltk.corpus import stopwords spanish_stopwords = set(stopwords.words(&#34;spanish&#34;)) # Precompilar la regex para limpiar el texto CLEAN_PATTERN = re.compile(r&#34;&lt;.*?&gt;|[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]&#34;) CHUNKS_DIR = &#39;/home/matias/RAG_master/storage/chunks&#39; def clean_text_batch(texts: list[str]) -&gt; list[str]: &#34;&#34;&#34; Limpia y lematiza un lote de textos utilizando spaCy en modo pipe. &#34;&#34;&#34; cleaned_texts = [] # Preprocesar cada texto con regex preprocessed_texts = [CLEAN_PATTERN.sub(&#34; &#34;, text).lower().strip() for text in texts] # Procesar el lote con nlp.pipe (esto es más rápido) for doc in nlp.pipe(preprocessed_texts, batch_size=32): # Filtrar stopwords y obtener lemas en un solo paso tokens = [token.lemma_ for token in doc if token.text not in spanish_stopwords] cleaned_texts.append(&#34; &#34;.join(tokens)) return cleaned_texts # %% # Cargar textos de chunks en una lista (en vez de procesarlos uno por uno) def load_all_chunk_texts(chunk_ids: list[str]) -&gt; list[tuple[str, str]]: &#34;&#34;&#34; Carga todos los textos de chunks dados sus IDs. Se asume que los textos se encuentran en &#39;./chunks/&lt;chunk_id&gt;.txt&#39;. Retorna una lista de tuplas (chunk_id, raw_text). &#34;&#34;&#34; texts = [] for chunk_id in chunk_ids: file_path = os.path.join(CHUNKS_DIR, f&#34;{chunk_id}.txt&#34;) if os.path.isfile(file_path): with open(file_path, &#34;r&#34;, encoding=&#34;utf-8&#34;) as f: raw_text = f.read() if raw_text.strip(): texts.append((chunk_id, raw_text)) return texts import pandas as pd from chunk_query import ChunkQuery # Tu clase de consulta, tal como la definimos antes CHUNKS_METADATA_FILE= &#34;/home/matias/RAG_master/storage/tables/chunks_index.json&#34; df_metadata = pd.read_json(CHUNKS_METADATA_FILE, orient=&#34;index&#34;) # 2. Inicializar la clase de consulta y filtrar los chunks de la carpeta /Academic/ cq = ChunkQuery(df_metadata) # Ejemplo de query: Filtrar aquellos chunks cuyo &#39;original_path&#39; contenga &#39;/Academic/&#39; academic_chunk_ids = cq.query_custom(&#34;original_path.str.contains(&#39;/Academic/1_Input_Raw/Drafts_Papers_Early_Drafts/2024_1/AGGVOL&#39;)&#34;) print(&#34;Cantidad de chunks en /Academic/1_Input_Raw/Drafts_Papers_Early_Drafts:&#34;, len(academic_chunk_ids)) # Cargar todos los textos all_chunks = load_all_chunk_texts(academic_chunk_ids[:100]) # academic_chunk_ids es la lista filtrada chunk_ids, raw_texts = zip(*all_chunks) # Separar IDs y textos chunk_ids, cleaned_texts = chunk_ids, clean_text_batch(raw_texts[:100]) # Separar IDs y textos --------------------------------------------------------------------------- FileNotFoundError Traceback (most recent call last) Cell In[6], line 6 2 from chunk_query import ChunkQuery # Tu clase de consulta, tal como la definimos antes 4 CHUNKS_METADATA_FILE= &#34;/home/matias/RAG_master/storage/tables/chunks_index.json&#34; ----&gt; 6 df_metadata = pd.read_json(CHUNKS_METADATA_FILE, orient=&#34;index&#34;) 8 # 2. Inicializar la clase de consulta y filtrar los chunks de la carpeta /Academic/ 9 cq = ChunkQuery(df_metadata) File ~/anaconda3/envs/new_env/lib/python3.11/site-packages/pandas/io/json/_json.py:791, in read_json(path_or_buf, orient, typ, dtype, convert_axes, convert_dates, keep_default_dates, precise_float, date_unit, encoding, encoding_errors, lines, chunksize, compression, nrows, storage_options, dtype_backend, engine) 788 if convert_axes is None and orient != &#34;table&#34;: 789 convert_axes = True --&gt; 791 json_reader = JsonReader( 792 path_or_buf, 793 orient=orient, 794 typ=typ, 795 dtype=dtype, 796 convert_axes=convert_axes, 797 convert_dates=convert_dates, 798 keep_default_dates=keep_default_dates, 799 precise_float=precise_float, 800 date_unit=date_unit, 801 encoding=encoding, 802 lines=lines, 803 chunksize=chunksize, 804 compression=compression, 805 nrows=nrows, 806 storage_options=storage_options, 807 encoding_errors=encoding_errors, 808 dtype_backend=dtype_backend, 809 engine=engine, 810 ) 812 if chunksize: 813 return json_reader File ~/anaconda3/envs/new_env/lib/python3.11/site-packages/pandas/io/json/_json.py:904, in JsonReader.__init__(self, filepath_or_buffer, orient, typ, dtype, convert_axes, convert_dates, keep_default_dates, precise_float, date_unit, encoding, lines, chunksize, compression, nrows, storage_options, encoding_errors, dtype_backend, engine) 902 self.data = filepath_or_buffer 903 elif self.engine == &#34;ujson&#34;: --&gt; 904 data = self._get_data_from_filepath(filepath_or_buffer) 905 self.data = self._preprocess_data(data) File ~/anaconda3/envs/new_env/lib/python3.11/site-packages/pandas/io/json/_json.py:960, in JsonReader._get_data_from_filepath(self, filepath_or_buffer) 952 filepath_or_buffer = self.handles.handle 953 elif ( 954 isinstance(filepath_or_buffer, str) 955 and filepath_or_buffer.lower().endswith( (...) 958 and not file_exists(filepath_or_buffer) 959 ): --&gt; 960 raise FileNotFoundError(f&#34;File {filepath_or_buffer} does not exist&#34;) 961 else: 962 warnings.warn( 963 &#34;Passing literal json to &#39;read_json&#39; is deprecated and &#34; 964 &#34;will be removed in a future version. To read from a &#34; (...) 967 stacklevel=find_stack_level(), 968 ) FileNotFoundError: File /home/matias/RAG_master/storage/tables/chunks_index.json does not exist">
+
+  <meta itemprop="name" content="Text Classifier Fast">
+  <meta itemprop="description" content="from sklearn.datasets import fetch_20newsgroups from sklearn.feature_extraction.text import TfidfVectorizer from sklearn.model_selection import train_test_split # Load dataset with 20 broad categories categories = [ &#34;sci.space&#34;, &#34;sci.electronics&#34;, &#34;sci.med&#34;, &#34;comp.graphics&#34;, &#34;comp.os.ms-windows.misc&#34;, &#34;rec.sport.baseball&#34;, &#34;rec.sport.hockey&#34;, &#34;talk.politics.misc&#34;, &#34;talk.religion.misc&#34;, &#34;misc.forsale&#34; ] newsgroups = fetch_20newsgroups(subset=&#34;all&#34;, categories=categories, remove=(&#34;headers&#34;, &#34;footers&#34;, &#34;quotes&#34;)) # Convert text to TF-IDF feature vectors vectorizer = TfidfVectorizer(stop_words=&#34;english&#34;, max_features=5000) # Limit feature size for speed X = vectorizer.fit_transform(newsgroups.data) y = newsgroups.target # Category labels # Split into train and test sets X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42) from sklearn.linear_model import LogisticRegression from sklearn.metrics import accuracy_score # Train the Logistic Regression classifier logreg = LogisticRegression(max_iter=1000) logreg.fit(X_train, y_train) # Evaluate on test set y_pred = logreg.predict(X_test) print(&#34;Logistic Regression Accuracy:&#34;, accuracy_score(y_test, y_pred)) Logistic Regression Accuracy: 0.8073196986006459 from sklearn.naive_bayes import MultinomialNB # Train the Naïve Bayes classifier nb = MultinomialNB() nb.fit(X_train, y_train) # Evaluate on test set y_pred_nb = nb.predict(X_test) print(&#34;Naïve Bayes Accuracy:&#34;, accuracy_score(y_test, y_pred_nb)) Naïve Bayes Accuracy: 0.8089343379978472 def classify_text(text, model): X_new = vectorizer.transform([text]) # Convert text to numerical features predicted_category = newsgroups.target_names[model.predict(X_new)[0]] return predicted_category sample_text = &#34;The recent discovery of a new exoplanet has excited many astronomers.&#34; print(&#34;Predicted Category (Logistic Regression):&#34;, classify_text(sample_text, logreg)) print(&#34;Predicted Category (Naïve Bayes):&#34;, classify_text(sample_text, nb)) Predicted Category (Logistic Regression): sci.space Predicted Category (Naïve Bayes): sci.space import os import re # Cargar modelo de spaCy en español y stopwords import spacy nlp = spacy.load(&#34;es_core_news_sm&#34;) # import nltk from nltk.corpus import stopwords spanish_stopwords = set(stopwords.words(&#34;spanish&#34;)) # Precompilar la regex para limpiar el texto CLEAN_PATTERN = re.compile(r&#34;&lt;.*?&gt;|[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]&#34;) CHUNKS_DIR = &#39;/home/matias/RAG_master/storage/chunks&#39; def clean_text_batch(texts: list[str]) -&gt; list[str]: &#34;&#34;&#34; Limpia y lematiza un lote de textos utilizando spaCy en modo pipe. &#34;&#34;&#34; cleaned_texts = [] # Preprocesar cada texto con regex preprocessed_texts = [CLEAN_PATTERN.sub(&#34; &#34;, text).lower().strip() for text in texts] # Procesar el lote con nlp.pipe (esto es más rápido) for doc in nlp.pipe(preprocessed_texts, batch_size=32): # Filtrar stopwords y obtener lemas en un solo paso tokens = [token.lemma_ for token in doc if token.text not in spanish_stopwords] cleaned_texts.append(&#34; &#34;.join(tokens)) return cleaned_texts # %% # Cargar textos de chunks en una lista (en vez de procesarlos uno por uno) def load_all_chunk_texts(chunk_ids: list[str]) -&gt; list[tuple[str, str]]: &#34;&#34;&#34; Carga todos los textos de chunks dados sus IDs. Se asume que los textos se encuentran en &#39;./chunks/&lt;chunk_id&gt;.txt&#39;. Retorna una lista de tuplas (chunk_id, raw_text). &#34;&#34;&#34; texts = [] for chunk_id in chunk_ids: file_path = os.path.join(CHUNKS_DIR, f&#34;{chunk_id}.txt&#34;) if os.path.isfile(file_path): with open(file_path, &#34;r&#34;, encoding=&#34;utf-8&#34;) as f: raw_text = f.read() if raw_text.strip(): texts.append((chunk_id, raw_text)) return texts import pandas as pd from chunk_query import ChunkQuery # Tu clase de consulta, tal como la definimos antes CHUNKS_METADATA_FILE= &#34;/home/matias/RAG_master/storage/tables/chunks_index.json&#34; df_metadata = pd.read_json(CHUNKS_METADATA_FILE, orient=&#34;index&#34;) # 2. Inicializar la clase de consulta y filtrar los chunks de la carpeta /Academic/ cq = ChunkQuery(df_metadata) # Ejemplo de query: Filtrar aquellos chunks cuyo &#39;original_path&#39; contenga &#39;/Academic/&#39; academic_chunk_ids = cq.query_custom(&#34;original_path.str.contains(&#39;/Academic/1_Input_Raw/Drafts_Papers_Early_Drafts/2024_1/AGGVOL&#39;)&#34;) print(&#34;Cantidad de chunks en /Academic/1_Input_Raw/Drafts_Papers_Early_Drafts:&#34;, len(academic_chunk_ids)) # Cargar todos los textos all_chunks = load_all_chunk_texts(academic_chunk_ids[:100]) # academic_chunk_ids es la lista filtrada chunk_ids, raw_texts = zip(*all_chunks) # Separar IDs y textos chunk_ids, cleaned_texts = chunk_ids, clean_text_batch(raw_texts[:100]) # Separar IDs y textos --------------------------------------------------------------------------- FileNotFoundError Traceback (most recent call last) Cell In[6], line 6 2 from chunk_query import ChunkQuery # Tu clase de consulta, tal como la definimos antes 4 CHUNKS_METADATA_FILE= &#34;/home/matias/RAG_master/storage/tables/chunks_index.json&#34; ----&gt; 6 df_metadata = pd.read_json(CHUNKS_METADATA_FILE, orient=&#34;index&#34;) 8 # 2. Inicializar la clase de consulta y filtrar los chunks de la carpeta /Academic/ 9 cq = ChunkQuery(df_metadata) File ~/anaconda3/envs/new_env/lib/python3.11/site-packages/pandas/io/json/_json.py:791, in read_json(path_or_buf, orient, typ, dtype, convert_axes, convert_dates, keep_default_dates, precise_float, date_unit, encoding, encoding_errors, lines, chunksize, compression, nrows, storage_options, dtype_backend, engine) 788 if convert_axes is None and orient != &#34;table&#34;: 789 convert_axes = True --&gt; 791 json_reader = JsonReader( 792 path_or_buf, 793 orient=orient, 794 typ=typ, 795 dtype=dtype, 796 convert_axes=convert_axes, 797 convert_dates=convert_dates, 798 keep_default_dates=keep_default_dates, 799 precise_float=precise_float, 800 date_unit=date_unit, 801 encoding=encoding, 802 lines=lines, 803 chunksize=chunksize, 804 compression=compression, 805 nrows=nrows, 806 storage_options=storage_options, 807 encoding_errors=encoding_errors, 808 dtype_backend=dtype_backend, 809 engine=engine, 810 ) 812 if chunksize: 813 return json_reader File ~/anaconda3/envs/new_env/lib/python3.11/site-packages/pandas/io/json/_json.py:904, in JsonReader.__init__(self, filepath_or_buffer, orient, typ, dtype, convert_axes, convert_dates, keep_default_dates, precise_float, date_unit, encoding, lines, chunksize, compression, nrows, storage_options, encoding_errors, dtype_backend, engine) 902 self.data = filepath_or_buffer 903 elif self.engine == &#34;ujson&#34;: --&gt; 904 data = self._get_data_from_filepath(filepath_or_buffer) 905 self.data = self._preprocess_data(data) File ~/anaconda3/envs/new_env/lib/python3.11/site-packages/pandas/io/json/_json.py:960, in JsonReader._get_data_from_filepath(self, filepath_or_buffer) 952 filepath_or_buffer = self.handles.handle 953 elif ( 954 isinstance(filepath_or_buffer, str) 955 and filepath_or_buffer.lower().endswith( (...) 958 and not file_exists(filepath_or_buffer) 959 ): --&gt; 960 raise FileNotFoundError(f&#34;File {filepath_or_buffer} does not exist&#34;) 961 else: 962 warnings.warn( 963 &#34;Passing literal json to &#39;read_json&#39; is deprecated and &#34; 964 &#34;will be removed in a future version. To read from a &#34; (...) 967 stacklevel=find_stack_level(), 968 ) FileNotFoundError: File /home/matias/RAG_master/storage/tables/chunks_index.json does not exist">
+  <meta itemprop="wordCount" content="744"></head>
+<body><div class="container"><header>
+<h1>Ejercicios en Notebooks</h1>
+</header>
+<div class="global-menu">
+<nav>
+<ul>
+<li class=""><a href="/ldd-uba/notebooks/">Notebooks</a></li></ul>
+</nav>
+</div>
+
+<div class="content-container">
+<main><h1>Text Classifier Fast</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.datasets <span style="color:#f92672">import</span> fetch_20newsgroups
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.feature_extraction.text <span style="color:#f92672">import</span> TfidfVectorizer
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.model_selection <span style="color:#f92672">import</span> train_test_split
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Load dataset with 20 broad categories</span>
+</span></span><span style="display:flex;"><span>categories <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;sci.space&#34;</span>, <span style="color:#e6db74">&#34;sci.electronics&#34;</span>, <span style="color:#e6db74">&#34;sci.med&#34;</span>, <span style="color:#e6db74">&#34;comp.graphics&#34;</span>, <span style="color:#e6db74">&#34;comp.os.ms-windows.misc&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;rec.sport.baseball&#34;</span>, <span style="color:#e6db74">&#34;rec.sport.hockey&#34;</span>, <span style="color:#e6db74">&#34;talk.politics.misc&#34;</span>, <span style="color:#e6db74">&#34;talk.religion.misc&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;misc.forsale&#34;</span>
+</span></span><span style="display:flex;"><span>]
+</span></span><span style="display:flex;"><span>newsgroups <span style="color:#f92672">=</span> fetch_20newsgroups(subset<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;all&#34;</span>, categories<span style="color:#f92672">=</span>categories, remove<span style="color:#f92672">=</span>(<span style="color:#e6db74">&#34;headers&#34;</span>, <span style="color:#e6db74">&#34;footers&#34;</span>, <span style="color:#e6db74">&#34;quotes&#34;</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Convert text to TF-IDF feature vectors</span>
+</span></span><span style="display:flex;"><span>vectorizer <span style="color:#f92672">=</span> TfidfVectorizer(stop_words<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;english&#34;</span>, max_features<span style="color:#f92672">=</span><span style="color:#ae81ff">5000</span>)  <span style="color:#75715e"># Limit feature size for speed</span>
+</span></span><span style="display:flex;"><span>X <span style="color:#f92672">=</span> vectorizer<span style="color:#f92672">.</span>fit_transform(newsgroups<span style="color:#f92672">.</span>data)
+</span></span><span style="display:flex;"><span>y <span style="color:#f92672">=</span> newsgroups<span style="color:#f92672">.</span>target  <span style="color:#75715e"># Category labels</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Split into train and test sets</span>
+</span></span><span style="display:flex;"><span>X_train, X_test, y_train, y_test <span style="color:#f92672">=</span> train_test_split(X, y, test_size<span style="color:#f92672">=</span><span style="color:#ae81ff">0.2</span>, random_state<span style="color:#f92672">=</span><span style="color:#ae81ff">42</span>)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.linear_model <span style="color:#f92672">import</span> LogisticRegression
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.metrics <span style="color:#f92672">import</span> accuracy_score
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Train the Logistic Regression classifier</span>
+</span></span><span style="display:flex;"><span>logreg <span style="color:#f92672">=</span> LogisticRegression(max_iter<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>)
+</span></span><span style="display:flex;"><span>logreg<span style="color:#f92672">.</span>fit(X_train, y_train)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Evaluate on test set</span>
+</span></span><span style="display:flex;"><span>y_pred <span style="color:#f92672">=</span> logreg<span style="color:#f92672">.</span>predict(X_test)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Logistic Regression Accuracy:&#34;</span>, accuracy_score(y_test, y_pred))
+</span></span></code></pre></div><pre><code>Logistic Regression Accuracy: 0.8073196986006459
+</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> sklearn.naive_bayes <span style="color:#f92672">import</span> MultinomialNB
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Train the Naïve Bayes classifier</span>
+</span></span><span style="display:flex;"><span>nb <span style="color:#f92672">=</span> MultinomialNB()
+</span></span><span style="display:flex;"><span>nb<span style="color:#f92672">.</span>fit(X_train, y_train)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Evaluate on test set</span>
+</span></span><span style="display:flex;"><span>y_pred_nb <span style="color:#f92672">=</span> nb<span style="color:#f92672">.</span>predict(X_test)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Naïve Bayes Accuracy:&#34;</span>, accuracy_score(y_test, y_pred_nb))
+</span></span></code></pre></div><pre><code>Naïve Bayes Accuracy: 0.8089343379978472
+</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">classify_text</span>(text, model):
+</span></span><span style="display:flex;"><span>    X_new <span style="color:#f92672">=</span> vectorizer<span style="color:#f92672">.</span>transform([text])  <span style="color:#75715e"># Convert text to numerical features</span>
+</span></span><span style="display:flex;"><span>    predicted_category <span style="color:#f92672">=</span> newsgroups<span style="color:#f92672">.</span>target_names[model<span style="color:#f92672">.</span>predict(X_new)[<span style="color:#ae81ff">0</span>]]
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> predicted_category
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>sample_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;The recent discovery of a new exoplanet has excited many astronomers.&#34;</span>
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Predicted Category (Logistic Regression):&#34;</span>, classify_text(sample_text, logreg))
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Predicted Category (Naïve Bayes):&#34;</span>, classify_text(sample_text, nb))
+</span></span></code></pre></div><pre><code>Predicted Category (Logistic Regression): sci.space
+Predicted Category (Naïve Bayes): sci.space
+</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> os
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> re
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Cargar modelo de spaCy en español y stopwords</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> spacy
+</span></span><span style="display:flex;"><span>nlp <span style="color:#f92672">=</span> spacy<span style="color:#f92672">.</span>load(<span style="color:#e6db74">&#34;es_core_news_sm&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># import nltk</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> nltk.corpus <span style="color:#f92672">import</span> stopwords
+</span></span><span style="display:flex;"><span>spanish_stopwords <span style="color:#f92672">=</span> set(stopwords<span style="color:#f92672">.</span>words(<span style="color:#e6db74">&#34;spanish&#34;</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Precompilar la regex para limpiar el texto</span>
+</span></span><span style="display:flex;"><span>CLEAN_PATTERN <span style="color:#f92672">=</span> re<span style="color:#f92672">.</span>compile(<span style="color:#e6db74">r</span><span style="color:#e6db74">&#34;&lt;.*?&gt;|[^a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s]&#34;</span>)
+</span></span><span style="display:flex;"><span>CHUNKS_DIR <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;/home/matias/RAG_master/storage/chunks&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">clean_text_batch</span>(texts: list[str]) <span style="color:#f92672">-&gt;</span> list[str]:
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Limpia y lematiza un lote de textos utilizando spaCy en modo pipe.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    cleaned_texts <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Preprocesar cada texto con regex</span>
+</span></span><span style="display:flex;"><span>    preprocessed_texts <span style="color:#f92672">=</span> [CLEAN_PATTERN<span style="color:#f92672">.</span>sub(<span style="color:#e6db74">&#34; &#34;</span>, text)<span style="color:#f92672">.</span>lower()<span style="color:#f92672">.</span>strip() <span style="color:#66d9ef">for</span> text <span style="color:#f92672">in</span> texts]
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Procesar el lote con nlp.pipe (esto es más rápido)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> doc <span style="color:#f92672">in</span> nlp<span style="color:#f92672">.</span>pipe(preprocessed_texts, batch_size<span style="color:#f92672">=</span><span style="color:#ae81ff">32</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Filtrar stopwords y obtener lemas en un solo paso</span>
+</span></span><span style="display:flex;"><span>        tokens <span style="color:#f92672">=</span> [token<span style="color:#f92672">.</span>lemma_ <span style="color:#66d9ef">for</span> token <span style="color:#f92672">in</span> doc <span style="color:#66d9ef">if</span> token<span style="color:#f92672">.</span>text <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> spanish_stopwords]
+</span></span><span style="display:flex;"><span>        cleaned_texts<span style="color:#f92672">.</span>append(<span style="color:#e6db74">&#34; &#34;</span><span style="color:#f92672">.</span>join(tokens))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> cleaned_texts
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># %%</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Cargar textos de chunks en una lista (en vez de procesarlos uno por uno)</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">load_all_chunk_texts</span>(chunk_ids: list[str]) <span style="color:#f92672">-&gt;</span> list[tuple[str, str]]:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Carga todos los textos de chunks dados sus IDs. 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Se asume que los textos se encuentran en &#39;./chunks/&lt;chunk_id&gt;.txt&#39;.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    Retorna una lista de tuplas (chunk_id, raw_text).
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    texts <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> chunk_id <span style="color:#f92672">in</span> chunk_ids:
+</span></span><span style="display:flex;"><span>        file_path <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>join(CHUNKS_DIR, <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{</span>chunk_id<span style="color:#e6db74">}</span><span style="color:#e6db74">.txt&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>isfile(file_path):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">with</span> open(file_path, <span style="color:#e6db74">&#34;r&#34;</span>, encoding<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;utf-8&#34;</span>) <span style="color:#66d9ef">as</span> f:
+</span></span><span style="display:flex;"><span>                raw_text <span style="color:#f92672">=</span> f<span style="color:#f92672">.</span>read()
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> raw_text<span style="color:#f92672">.</span>strip():
+</span></span><span style="display:flex;"><span>                    texts<span style="color:#f92672">.</span>append((chunk_id, raw_text))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> texts
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> chunk_query <span style="color:#f92672">import</span> ChunkQuery  <span style="color:#75715e"># Tu clase de consulta, tal como la definimos antes</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>CHUNKS_METADATA_FILE<span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/home/matias/RAG_master/storage/tables/chunks_index.json&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>df_metadata <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_json(CHUNKS_METADATA_FILE, orient<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;index&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 2. Inicializar la clase de consulta y filtrar los chunks de la carpeta /Academic/</span>
+</span></span><span style="display:flex;"><span>cq <span style="color:#f92672">=</span> ChunkQuery(df_metadata)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Ejemplo de query: Filtrar aquellos chunks cuyo &#39;original_path&#39; contenga &#39;/Academic/&#39;</span>
+</span></span><span style="display:flex;"><span>academic_chunk_ids <span style="color:#f92672">=</span> cq<span style="color:#f92672">.</span>query_custom(<span style="color:#e6db74">&#34;original_path.str.contains(&#39;/Academic/1_Input_Raw/Drafts_Papers_Early_Drafts/2024_1/AGGVOL&#39;)&#34;</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">&#34;Cantidad de chunks en /Academic/1_Input_Raw/Drafts_Papers_Early_Drafts:&#34;</span>, len(academic_chunk_ids))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Cargar todos los textos</span>
+</span></span><span style="display:flex;"><span>all_chunks <span style="color:#f92672">=</span> load_all_chunk_texts(academic_chunk_ids[:<span style="color:#ae81ff">100</span>])  <span style="color:#75715e"># academic_chunk_ids es la lista filtrada</span>
+</span></span><span style="display:flex;"><span>chunk_ids, raw_texts <span style="color:#f92672">=</span> zip(<span style="color:#f92672">*</span>all_chunks)  <span style="color:#75715e"># Separar IDs y textos</span>
+</span></span><span style="display:flex;"><span>chunk_ids, cleaned_texts <span style="color:#f92672">=</span> chunk_ids, clean_text_batch(raw_texts[:<span style="color:#ae81ff">100</span>])  <span style="color:#75715e"># Separar IDs y textos</span>
+</span></span></code></pre></div><pre><code>---------------------------------------------------------------------------
+
+FileNotFoundError                         Traceback (most recent call last)
+
+Cell In[6], line 6
+      2 from chunk_query import ChunkQuery  # Tu clase de consulta, tal como la definimos antes
+      4 CHUNKS_METADATA_FILE= &quot;/home/matias/RAG_master/storage/tables/chunks_index.json&quot;
+----&gt; 6 df_metadata = pd.read_json(CHUNKS_METADATA_FILE, orient=&quot;index&quot;)
+      8 # 2. Inicializar la clase de consulta y filtrar los chunks de la carpeta /Academic/
+      9 cq = ChunkQuery(df_metadata)
+
+
+File ~/anaconda3/envs/new_env/lib/python3.11/site-packages/pandas/io/json/_json.py:791, in read_json(path_or_buf, orient, typ, dtype, convert_axes, convert_dates, keep_default_dates, precise_float, date_unit, encoding, encoding_errors, lines, chunksize, compression, nrows, storage_options, dtype_backend, engine)
+    788 if convert_axes is None and orient != &quot;table&quot;:
+    789     convert_axes = True
+--&gt; 791 json_reader = JsonReader(
+    792     path_or_buf,
+    793     orient=orient,
+    794     typ=typ,
+    795     dtype=dtype,
+    796     convert_axes=convert_axes,
+    797     convert_dates=convert_dates,
+    798     keep_default_dates=keep_default_dates,
+    799     precise_float=precise_float,
+    800     date_unit=date_unit,
+    801     encoding=encoding,
+    802     lines=lines,
+    803     chunksize=chunksize,
+    804     compression=compression,
+    805     nrows=nrows,
+    806     storage_options=storage_options,
+    807     encoding_errors=encoding_errors,
+    808     dtype_backend=dtype_backend,
+    809     engine=engine,
+    810 )
+    812 if chunksize:
+    813     return json_reader
+
+
+File ~/anaconda3/envs/new_env/lib/python3.11/site-packages/pandas/io/json/_json.py:904, in JsonReader.__init__(self, filepath_or_buffer, orient, typ, dtype, convert_axes, convert_dates, keep_default_dates, precise_float, date_unit, encoding, lines, chunksize, compression, nrows, storage_options, encoding_errors, dtype_backend, engine)
+    902     self.data = filepath_or_buffer
+    903 elif self.engine == &quot;ujson&quot;:
+--&gt; 904     data = self._get_data_from_filepath(filepath_or_buffer)
+    905     self.data = self._preprocess_data(data)
+
+
+File ~/anaconda3/envs/new_env/lib/python3.11/site-packages/pandas/io/json/_json.py:960, in JsonReader._get_data_from_filepath(self, filepath_or_buffer)
+    952     filepath_or_buffer = self.handles.handle
+    953 elif (
+    954     isinstance(filepath_or_buffer, str)
+    955     and filepath_or_buffer.lower().endswith(
+   (...)
+    958     and not file_exists(filepath_or_buffer)
+    959 ):
+--&gt; 960     raise FileNotFoundError(f&quot;File {filepath_or_buffer} does not exist&quot;)
+    961 else:
+    962     warnings.warn(
+    963         &quot;Passing literal json to 'read_json' is deprecated and &quot;
+    964         &quot;will be removed in a future version. To read from a &quot;
+   (...)
+    967         stacklevel=find_stack_level(),
+    968     )
+
+
+FileNotFoundError: File /home/matias/RAG_master/storage/tables/chunks_index.json does not exist
+</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"></code></pre></div><div class="edit-meta">
+
+<br></div><nav class="pagination"><a class="nav nav-prev" href="https://matuteiglesias.github.io/ldd-uba/ldd/notebooks/text-classifier/" title="Text Classifier"><i class="fas fa-arrow-left" aria-hidden="true"></i>&nbsp;Prev - Text Classifier</a>
+<a class="nav nav-next" href="https://matuteiglesias.github.io/ldd-uba/notebooks/" title="Notebooks">Next - Notebooks <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+</nav><footer><p class="powered">Powered by <a href="https://gohugo.io">Hugo</a>. Theme by <a href="https://themes.gohugo.io/hugo-theme-techdoc/">TechDoc</a>. Designed by <a href="https://github.com/thingsym/hugo-theme-techdoc">Thingsym</a>.</p>
+</footer>
+</main>
+<div class="sidebar">
+
+<div class="sidebar-footer"></div>
+</div>
+
+</div><a href="#" id="backtothetop-fixed" class="backtothetop"
+ data-backtothetop-duration="600"
+ data-backtothetop-easing="easeOutQuart"
+ data-backtothetop-fixed-fadeIn="1000"
+ data-backtothetop-fixed-fadeOut="1000"
+ data-backtothetop-fixed-bottom="10"
+ data-backtothetop-fixed-right="20">
+<span class="fa-layers fa-fw">
+<i class="fas fa-circle"></i>
+<i class="fas fa-arrow-circle-up"></i>
+</span></a>
+</div>
+</body>
+</html>

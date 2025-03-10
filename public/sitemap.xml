@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://matuteiglesias.github.io/ldd-uba/categories/</loc>
+  </url><url>
+    <loc>https://matuteiglesias.github.io/ldd-uba/</loc>
+  </url><url>
+    <loc>https://matuteiglesias.github.io/ldd-uba/notebooks/</loc>
+  </url><url>
+    <loc>https://matuteiglesias.github.io/ldd-uba/tags/</loc>
+  </url><url>
+    <loc>https://matuteiglesias.github.io/ldd-uba/ldd/notebooks/text-classifier/</loc>
+  </url><url>
+    <loc>https://matuteiglesias.github.io/ldd-uba/ldd/notebooks/text-classifier-fast/</loc>
+  </url>
+</urlset>
