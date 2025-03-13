@@ -1,0 +1,100 @@
+<!doctype html><html lang=es><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Ejercicio 6: Corrección de Errores Comunes en Python - Ejercicios en Notebooks</title>
+<meta name=generator content="Hugo 0.145.0"><link href=https://matuteiglesias.github.io/ldd-uba//index.xml rel=alternate type=application/rss+xml><link rel=canonical href=https://matuteiglesias.github.io/ldd-uba/notebooks/06/><link rel=stylesheet href=https://matuteiglesias.github.io/ldd-uba/css/theme.min.css><link rel=stylesheet href=https://matuteiglesias.github.io/ldd-uba/css/chroma.min.css><script defer src=https://matuteiglesias.github.io/ldd-uba//js/fontawesome6/all.min.js></script><script src=https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/jquery.easing@1.4.1/jquery.easing.min.js integrity="sha256-H3cjtrm/ztDeuhCN9I4yh4iN2Ybx/y1RM7rMmAesA0k=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js integrity="sha256-4XodgW4TwIJuDtf+v6vDJ39FVxI0veC/kSCCmnFp7ck=" crossorigin=anonymous></script><script src=https://matuteiglesias.github.io/ldd-uba/js/bundle.js></script><style>:root{}</style><meta property="og:url" content="https://matuteiglesias.github.io/ldd-uba/notebooks/06/"><meta property="og:site_name" content="Ejercicios en Notebooks"><meta property="og:title" content="Ejercicio 6: Corrección de Errores Comunes en Python"><meta property="og:description" content="Ejercicio 6: Corrección de Errores Comunes en Python Este ejercicio está diseñado para que los estudiantes experimenten y resuelvan los errores más frecuentes al programar en Python. A través de la corrección de estos errores, se busca mejorar la comprensión de los conceptos básicos y avanzados de Python.
+Objetivos Identificar y corregir errores comunes en Python. Comprender la naturaleza de los errores y cómo evitarlos en el futuro. Desarrollar habilidades de depuración y resolución de problemas. Entrada de Datos Código Python con errores predefinidos. Código Base A continuación se presenta el código base con errores comunes. Cada línea contiene un error que debe ser corregido. Las pistas están proporcionadas en los comentarios."><meta property="og:locale" content="es"><meta property="og:type" content="article"><meta property="article:section" content="notebooks"><meta name=twitter:card content="summary"><meta name=twitter:title content="Ejercicio 6: Corrección de Errores Comunes en Python"><meta name=twitter:description content="Ejercicio 6: Corrección de Errores Comunes en Python Este ejercicio está diseñado para que los estudiantes experimenten y resuelvan los errores más frecuentes al programar en Python. A través de la corrección de estos errores, se busca mejorar la comprensión de los conceptos básicos y avanzados de Python.
+Objetivos Identificar y corregir errores comunes en Python. Comprender la naturaleza de los errores y cómo evitarlos en el futuro. Desarrollar habilidades de depuración y resolución de problemas. Entrada de Datos Código Python con errores predefinidos. Código Base A continuación se presenta el código base con errores comunes. Cada línea contiene un error que debe ser corregido. Las pistas están proporcionadas en los comentarios."><meta itemprop=name content="Ejercicio 6: Corrección de Errores Comunes en Python"><meta itemprop=description content="Ejercicio 6: Corrección de Errores Comunes en Python Este ejercicio está diseñado para que los estudiantes experimenten y resuelvan los errores más frecuentes al programar en Python. A través de la corrección de estos errores, se busca mejorar la comprensión de los conceptos básicos y avanzados de Python.
+Objetivos Identificar y corregir errores comunes en Python. Comprender la naturaleza de los errores y cómo evitarlos en el futuro. Desarrollar habilidades de depuración y resolución de problemas. Entrada de Datos Código Python con errores predefinidos. Código Base A continuación se presenta el código base con errores comunes. Cada línea contiene un error que debe ser corregido. Las pistas están proporcionadas en los comentarios."><meta itemprop=wordCount content="521"><script src=https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js></script><script>let searchIndex=[];fetch("https://matuteiglesias.github.io/ldd-uba//index.json").then(e=>e.json()).then(e=>{searchIndex=lunr(function(){this.ref("url"),this.field("title"),this.field("description"),this.field("content"),e.forEach(e=>this.add(e))})});function performSearch(){let t=document.getElementById("searchBox").value.trim(),n=searchIndex.search(t),e=document.getElementById("searchResults");e.innerHTML="",n.forEach(t=>{let n=document.createElement("a");n.href=t.ref,n.textContent=t.ref,e.appendChild(n),e.appendChild(document.createElement("br"))})}</script></head><body><div class=container><header><input type=text id=searchBox placeholder=Buscar... onkeyup=performSearch() style=width:200px;padding:5px><div id=searchResults style="position:absolute;background:#fff;border:1px solid #ccc;width:200px"></div></header><div class=global-menu><nav><ul><li><a href=/ldd-uba/>Inicio</a></li><li><a href=/ldd-uba/notebooks/>Notebooks</a></li><li><a href=/ldd-uba/notebooks/python-pandas/>Python y Pandas</a></li><li><a href=/ldd-uba/notebooks/bases-de-datos/>Bases de Datos y SQL</a></li><li><a href=/ldd-uba/notebooks/visualizacion/>Visualización de Datos</a></li><li><a href=/ldd-uba/notebooks/estadistica/>Estadística y Probabilidad</a></li></ul></nav></div><div class=content-container><main><div class=content-container><aside class=sidebar><h3>📑 Contenidos</h3><nav id=TableOfContents><ul><li><a href=#objetivos>Objetivos</a></li><li><a href=#entrada-de-datos>Entrada de Datos</a></li><li><a href=#código-base>Código Base</a><ul><li><a href=#nivel-1-errores-básicos>Nivel 1: Errores Básicos</a></li><li><a href=#nivel-2-errores-más-avanzados>Nivel 2: Errores Más Avanzados</a></li></ul></li><li><a href=#tareas>Tareas</a></li><li><a href=#pruebas>Pruebas</a></li><li><a href=#conclusión>Conclusión</a></li></ul></nav><h3>📂 Otros Notebooks</h3><ul><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/01/>01</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/02/>02</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/03/>03</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/04/>04</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/05/>05</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/06/>06</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/07/>07</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/08/>08</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/09/>09</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/10/>10</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/11/>11</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/12/>12</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/13/>13</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/14/>14</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/15/>15</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/16/>16</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/17/>17</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/18/>18</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/19/>19</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/20/>20</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/21/>21</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/22/>22</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/23/>00</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/24/>24</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/25/>25</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/26/>26</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/27/>27</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/28/>28</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/29/>00</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/30/>30</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/31/>31</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/32/>32</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/33/>33</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/34/>34</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/35/>35</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/36/>36</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/37/>00</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/38/>38</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/39/>39</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/40/>40</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/41/>41</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/42/>42</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/43/>43</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/44/>44</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/45/>45</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/46/>46</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/47/>47</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/48/>48</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/49/>49</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/50/>50</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/51/>51</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/52/>52</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/53/>53</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/54/>54</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/55/>55</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/56/>56</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/57/>57</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/58/>58</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/59/>59</a></li><li><a href=https://matuteiglesias.github.io/ldd-uba/notebooks/60/>60</a></li></ul></aside><div class=main-content style=margin-left:20px;padding-left:10px;max-width:80%><h1 id=ejercicio-6-corrección-de-errores-comunes-en-python>Ejercicio 6: Corrección de Errores Comunes en Python</h1><p>Este ejercicio está diseñado para que los estudiantes experimenten y resuelvan los errores más frecuentes al programar en Python. A través de la corrección de estos errores, se busca mejorar la comprensión de los conceptos básicos y avanzados de Python.</p><h2 id=objetivos>Objetivos</h2><ul><li>Identificar y corregir errores comunes en Python.</li><li>Comprender la naturaleza de los errores y cómo evitarlos en el futuro.</li><li>Desarrollar habilidades de depuración y resolución de problemas.</li></ul><h2 id=entrada-de-datos>Entrada de Datos</h2><ul><li>Código Python con errores predefinidos.</li></ul><h2 id=código-base>Código Base</h2><p>A continuación se presenta el código base con errores comunes. Cada línea contiene un error que debe ser corregido. Las pistas están proporcionadas en los comentarios.</p><h3 id=nivel-1-errores-básicos>Nivel 1: Errores Básicos</h3><pre tabindex=0><code># 1. Indentación Incorrecta (IndentationError)
+def funcion():
+print(&#34;Hola mundo&#34;)  
+
+# 2. Error de Tipos (TypeError)
+print(&#34;La edad es: &#34; + 25)  
+
+# 3. Variables No Definidas (NameError)
+print(nombre)  
+
+# 4. Índices Fuera de Rango (IndexError)
+lista = [10, 20, 30]
+print(lista[3])  
+
+# 5. Uso Incorrecto de for y range()
+lista = [1, 2, 3, 4]
+for i in range(1, len(lista)):  
+    print(lista[i])
+
+# 6. Acceso Incorrecto a Diccionarios (KeyError)
+persona = {&#34;nombre&#34;: &#34;Carlos&#34;, &#34;edad&#34;: 30}
+print(persona[&#34;direccion&#34;])  
+
+# 7. Asignación en Condiciones (SyntaxError)
+x = 10
+if x = 10:  
+    print(&#34;X es 10&#34;)
+
+# 8. Error de Alcance (UnboundLocalError)
+x = 5
+def incrementar():
+    x += 1  
+incrementar()
+
+# 9. División por Cero (ZeroDivisionError)
+print(10 / 0)  
+
+# 10. Archivos No Encontrados (FileNotFoundError)
+with open(&#34;archivo.txt&#34;, &#34;r&#34;) as f:
+    contenido = f.read()
+</code></pre><h3 id=nivel-2-errores-más-avanzados>Nivel 2: Errores Más Avanzados</h3><pre tabindex=0><code># 11. Mutabilidad de Listas en Funciones
+def agregar_elemento(lista=[]):
+    lista.append(&#34;⚠&#34;)
+    return lista
+print(agregar_elemento())  
+print(agregar_elemento())  
+
+# 12. Confusión entre is y ==
+a = [1, 2, 3]
+b = [1, 2, 3]
+print(a is b)  
+
+# 13. Iteración sobre un Diccionario sin .items()
+diccionario = {&#34;a&#34;: 1, &#34;b&#34;: 2, &#34;c&#34;: 3}
+for clave, valor in diccionario:  
+    print(clave, valor)
+
+# 14. Error en el Uso de enumerate()
+lista = [&#34;a&#34;, &#34;b&#34;, &#34;c&#34;]
+for item in enumerate(lista):  
+    print(item)
+
+# 15. Olvidar el return en una Función
+def suma(a, b):
+    resultado = a + b  
+print(suma(5, 3))  
+
+# 16. Importar Mal un Módulo (ModuleNotFoundError)
+import numpy  
+
+# 17. Modificar una Lista Mientras se Itera
+lista = [1, 2, 3, 4, 5]
+for item in lista:
+    if item % 2 == 0:
+        lista.remove(item)  
+print(lista)
+
+# 18. Uso Incorrecto de zip()
+nombres = [&#34;Ana&#34;, &#34;Luis&#34;, &#34;Carlos&#34;]
+edades = [25, 30]
+for nombre, edad in zip(nombres, edades):
+    print(f&#34;{nombre} tiene {edad} años.&#34;)  
+
+# 19. Error al Usar open() sin with
+f = open(&#34;datos.txt&#34;, &#34;r&#34;)  
+contenido = f.read()
+
+# 20. Usar range() con len() Incorrectamente
+lista = [&#34;a&#34;, &#34;b&#34;, &#34;c&#34;]
+for i in range(len(lista)):
+    if lista[i] == &#34;b&#34;:
+        lista.append(&#34;d&#34;)  
+print(lista)
+</code></pre><h2 id=tareas>Tareas</h2><ul><li>Corregir cada error en el código proporcionado.</li><li>Asegurarse de que el código se ejecute sin errores y produzca una salida lógica.</li></ul><h2 id=pruebas>Pruebas</h2><p>Ejecute el código corregido y verifique que no se produzcan errores. Asegúrese de que la salida sea coherente con las expectativas lógicas de cada fragmento de código.</p><h2 id=conclusión>Conclusión</h2><p>Al finalizar este ejercicio, el código debería ejecutarse sin errores. Este ejercicio ayuda a desarrollar habilidades críticas de depuración y mejora la comprensión de los errores comunes en Python.</p><div class=edit-meta><br></div><nav class=pagination><a class="nav nav-prev" href=https://matuteiglesias.github.io/ldd-uba/notebooks/05/ title=05><i class="fas fa-arrow-left" aria-hidden=true></i>&nbsp;Prev - 05
+</a><a class="nav nav-next" href=https://matuteiglesias.github.io/ldd-uba/notebooks/07/ title=07>Next - 07 <i class="fas fa-arrow-right" aria-hidden=true></i></a></nav></div></div><footer><p class=powered>Powered by <a href=https://gohugo.io>Hugo</a>. Theme by <a href=https://themes.gohugo.io/hugo-theme-techdoc/>TechDoc</a>. Designed by <a href=https://github.com/thingsym/hugo-theme-techdoc>Thingsym</a>.</p></footer></main></div><a href=# id=backtothetop-fixed class=backtothetop data-backtothetop-duration=600 data-backtothetop-easing=easeOutQuart data-backtothetop-fixed-fadein=1000 data-backtothetop-fixed-fadeout=1000 data-backtothetop-fixed-bottom=10 data-backtothetop-fixed-right=20><span class="fa-layers fa-fw"><i class="fas fa-circle"></i>
+<i class="fas fa-arrow-circle-up"></i></span></a></div></body></html>
