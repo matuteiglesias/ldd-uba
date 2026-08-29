@@ -6,14 +6,14 @@ Repositorio fuente de un sitio Hugo que organiza ejercicios y notebooks para cur
 
 ## Qué ofrece
 
-El catálogo reúne 58 ejercicios organizados en cuatro áreas:
+El catálogo reúne 60 ejercicios numerados (`content/notebooks/01.md` a `content/notebooks/60.md`) organizados en cuatro áreas:
 
 - Python y Pandas;
 - introducción a bases de datos;
 - modelado relacional y SQL;
 - visualización, probabilidad y estadística aplicada.
 
-`content/_index.md` es la entrada editorial y enlaza las páginas individuales bajo `content/notebooks/`.
+`content/_index.md` es la entrada editorial. Bajo `content/notebooks/` también existen cuatro `_index.md` de categorías (`bases-de-datos`, `estadistica`, `python-pandas` y `visualizacion`); esas páginas estructuran la navegación Hugo y no cuentan como ejercicios.
 
 ## Para quién está pensado
 
@@ -50,7 +50,7 @@ hugo --minify
 ```text
 config.toml          configuración de Hugo
 content/_index.md    portada y catálogo
-content/notebooks/   páginas de los ejercicios
+content/notebooks/   60 ejercicios numerados + 4 índices de categoría
 themes/techdoc/      tema administrado como submódulo
 ```
 
@@ -75,7 +75,7 @@ Un ejercicio publicado debería indicar:
 
 ## Próxima revisión útil
 
-- verificar el despliegue y los 58 enlaces;
+- verificar el despliegue y los 60 enlaces de ejercicios;
 - identificar notebooks faltantes o duplicados;
 - asociar cada página con su repositorio fuente;
 - declarar qué ejercicios forman parte de cursos vigentes;
